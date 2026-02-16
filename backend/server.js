@@ -5,12 +5,12 @@ const cors = require('cors');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
-// ✅ FIX: Importing the exact filenames you have on GitHub
+// ✅ FIX: Imports now match your PLURAL filenames exactly
 const authRoute = require('./routes/auth');
-const userRoute = require('./routes/users');         // Changed 'users' -> 'user'
-const conversationRoute = require('./routes/conversation'); // Changed 'conversations' -> 'conversation'
-const messageRoute = require('./routes/messege');   // Changed 'messages' -> 'messege'
-const storyRoute = require('./routes/stories');
+const userRoute = require('./routes/users');               // Matches 'users.js'
+const conversationRoute = require('./routes/conversations'); // Matches 'conversations.js'
+const messageRoute = require('./routes/messages');           // Matches 'messages.js'
+const storyRoute = require('./routes/stories');              // Matches 'stories.js'
 
 const app = express();
 
@@ -114,4 +114,3 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
