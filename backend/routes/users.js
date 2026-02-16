@@ -35,7 +35,7 @@ router.put("/:id/password", async (req, res) => {
             return res.status(500).json(err);
         }
     } else {
-        return res.status(403).json("You can update only your account!");
+        return res.status(403).json("Action forbidden");
     }
 });
 
@@ -152,5 +152,72 @@ router.get("/search/:query", async (req, res) => {
         return res.status(500).json(err);
     }
 });
+
+// 9. SEND FRIEND REQUEST
+router.put("/:id/request", async (req, res) => {
+  if (req.body.userId !== req.params.id) {
+    try {
+      const user = await User.findById(req.params.id);
+      const currentUser = await User.findById(req.body.userId);
+      
+      if (!user.friendRequests.includes(req.body.userId) && !user.friends.includes(req.body.userId)) {
+        await user.updateOne({ $push: { friendRequests: req.body.userId } });
+        return res.status(200).json("Friend request sent");
+      } else {
+        return res.status(403).json("You already sent a request or are already friends");
+      }
+    } catch (err) {
+      return res.status(500).json(err);
+    }
+  } else {
+    return res.status(403).json("You cannot request yourself");
+  }
+});
+
+// 10. ACCEPT FRIEND REQUEST
+router.put("/:id/accept", async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id); // The person who sent the request
+      const currentUser = await User.findById(req.body.userId); // ME (accepting it)
+
+      if (currentUser.friendRequests.includes(req.params.id)) {
+        // Add each other to friends list
+        await user.updateOne({ $push: { friends: req.body.userId } });
+        await currentUser.updateOne({ $push: { friends: req.params.id } });
+        
+        // Remove from requests list
+        await currentUser.updateOne({ $pull: { friendRequests: req.params.id } });
+        
+        return res.status(200).json("Friend request accepted");
+      } else {
+        return res.status(403).json("No request from this user");
+      }
+    } catch (err) {
+      return res.status(500).json(err);
+    }
+});
+
+// 11. UNFRIEND / CANCEL REQUEST
+router.put("/:id/unfriend", async (req, res) => {
+    if (req.body.userId !== req.params.id) {
+      try {
+        const user = await User.findById(req.params.id);
+        const currentUser = await User.findById(req.body.userId);
+  
+        if (currentUser.friends.includes(req.params.id)) {
+          await user.updateOne({ $pull: { friends: req.body.userId } });
+          await currentUser.updateOne({ $pull: { friends: req.params.id } });
+          return res.status(200).json("User has been unfriended");
+        } else {
+             await user.updateOne({ $pull: { friendRequests: req.body.userId } });
+             return res.status(200).json("Request cancelled");
+        }
+      } catch (err) {
+        return res.status(500).json(err);
+      }
+    } else {
+      return res.status(403).json("Action forbidden");
+    }
+  });
 
 module.exports = router;
