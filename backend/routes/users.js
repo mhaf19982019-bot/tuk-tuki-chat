@@ -2,16 +2,16 @@ const User = require("../models/User");
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 
-// 1. UPDATE USER (Handles Nickname & Avatar Selection)
+// 1. UPDATE USER
 router.put("/:id", async (req, res) => {
   if (req.body.userId === req.params.id || req.body.isAdmin) {
     try {
       const user = await User.findByIdAndUpdate(req.params.id, {
         $set: req.body,
       }, { new: true });
-      res.status(200).json("Account updated");
+      return res.status(200).json("Account updated");
     } catch (err) {
-      res.status(500).json(err);
+      return res.status(500).json(err);
     }
   } else {
     return res.status(403).json("You can update only your account!");
@@ -30,12 +30,12 @@ router.put("/:id/password", async (req, res) => {
             const newHashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
             await user.updateOne({ $set: { password: newHashedPassword } });
-            res.status(200).json("Password updated successfully!");
+            return res.status(200).json("Password updated successfully!");
         } catch (err) {
-            res.status(500).json(err);
+            return res.status(500).json(err);
         }
     } else {
-        res.status(403).json("You can update only your account!");
+        return res.status(403).json("You can update only your account!");
     }
 });
 
@@ -46,16 +46,16 @@ router.put("/:id/block", async (req, res) => {
             const user = await User.findById(req.params.id);
             if (!user.blockedUsers.includes(req.body.blockId)) {
                 await user.updateOne({ $push: { blockedUsers: req.body.blockId } });
-                res.status(200).json("User blocked!");
+                return res.status(200).json("User blocked!");
             } else {
                 await user.updateOne({ $pull: { blockedUsers: req.body.blockId } });
-                res.status(200).json("User unblocked!");
+                return res.status(200).json("User unblocked!");
             }
         } catch (err) {
-            res.status(500).json(err);
+            return res.status(500).json(err);
         }
     } else {
-        res.status(403).json("Action forbidden");
+        return res.status(403).json("Action forbidden");
     }
 });
 
@@ -64,9 +64,9 @@ router.delete("/:id", async (req, res) => {
   if (req.body.userId === req.params.id || req.body.isAdmin) {
     try {
       await User.findByIdAndDelete(req.params.id);
-      res.status(200).json("Account deleted");
+      return res.status(200).json("Account deleted");
     } catch (err) {
-      res.status(500).json(err);
+      return res.status(500).json(err);
     }
   } else {
     return res.status(403).json("Delete only your account!");
@@ -83,9 +83,9 @@ router.get("/", async (req, res) => {
       : await User.findOne({ username: username });
     if (!user) return res.status(404).json("User not found");
     const { password, updatedAt, ...other } = user._doc;
-    res.status(200).json(other);
+    return res.status(200).json(other);
   } catch (err) {
-    res.status(500).json(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -105,9 +105,9 @@ router.get("/friends/:userId", async (req, res) => {
           friendList.push({ _id, username, nickname, profilePic });
       }
     });
-    res.status(200).json(friendList);
+    return res.status(200).json(friendList);
   } catch (err) {
-    res.status(500).json(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -129,9 +129,9 @@ router.get("/requests/:userId", async (req, res) => {
             requestList.push({ _id, username, profilePic });
         }
     });
-    res.status(200).json(requestList);
+    return res.status(200).json(requestList);
   } catch (err) {
-    res.status(500).json(err);
+    return res.status(500).json(err);
   }
 });
 
@@ -147,9 +147,9 @@ router.get("/search/:query", async (req, res) => {
             username: user.username,
             profilePic: user.profilePic
         }));
-        res.status(200).json(result);
+        return res.status(200).json(result);
     } catch (err) {
-        res.status(500).json(err);
+        return res.status(500).json(err);
     }
 });
 
