@@ -7,7 +7,7 @@ require('dotenv').config();
 
 // ✅ FIX: Importing the exact filenames you have on GitHub
 const authRoute = require('./routes/auth');
-const userRoute = require('./routes/user');         // Changed 'users' -> 'user'
+const userRoute = require('./routes/users');         // Changed 'users' -> 'user'
 const conversationRoute = require('./routes/conversation'); // Changed 'conversations' -> 'conversation'
 const messageRoute = require('./routes/messege');   // Changed 'messages' -> 'messege'
 const storyRoute = require('./routes/stories');
@@ -114,3 +114,4 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
